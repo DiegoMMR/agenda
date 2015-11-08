@@ -24,23 +24,6 @@ char Op3[1] = { 's' };
 string mayus = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 string min = "abcdefghijklmnopqrstuvwxyz";
 
-char letras1[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z' };
-char letras2[] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z' };
-
-struct orden
-{
-	char nombre1[20];
-	char nombre2[20];
-	char apellido1[20];
-	char apellido2[20];
-	char telefono[20];
-	char correo[40];
-}var;
-
-orden DP[];
-int conteo;
-
-
 //para mandar datos al archivo
 ofstream entrada;
 ofstream temp;
@@ -49,6 +32,7 @@ ifstream salida;
 
 void inicio()
 {
+	//menu principal
 	system("cls");
 	cout << "BIENVENIDO A SU AGENDA TELEFONICA \n\n" << endl;;
 
@@ -58,11 +42,11 @@ void inicio()
 	cout << "4. Eliminar contacto" << endl;
 	cout << "5. Buscar\n\n" << endl;
 	cout << "Ingrese numero de Opcion" << endl;
+	//ingreso de la seleccion
 	cin >> Op1;
 
 	while (Op1 > 5)
 	{
-
 		Op1 = 0;
 		cout << "\nIngrese un numero valido\n" << endl;
 		cin >> Op1;
@@ -74,6 +58,7 @@ void ingresar_datos()
 {
 	while (Op3[0] == 's')
 	{
+		//pide el ingreso de los datos
 		system("cls");
 		cout << "\n Ingrese datos Solicitados\n" << endl;
 		cout << "Primer Nombre: ";
@@ -92,9 +77,10 @@ void ingresar_datos()
 		cout << endl;
 
 
-		//abre el archivo para poder meter los datos
+		//abre el archivo para poder meter los datos si borrar los existentes gracias a "ios::app"
 		entrada.open("Datos.txt", ios::out | ios::app);
 
+		//ingresa los datos al archivo
 		entrada << name1 << " " << name2 << " " << name3 << " " << name4 << "\n" << Tel << "\n" << Email << "\n\n";
 
 		//lo cierra para que se puedan gardar los cambios
@@ -113,15 +99,16 @@ void consultar()
 	//esto funciona para abrir el archivo en forma de lectura
 	salida.open("Datos.txt", ios::in);
 
+	//si el archivo no sirve muestra el mensaje
 	if (salida.fail())
 	{
 		cout << "Error al abrir Datos.txt" << endl;
 		system("pause");
 	}
 	else{
+		//!salida.eof --> hasta que llegue al final del archivo
 
 		salida >> name1;
-
 		while (!salida.eof())
 		{
 			salida >> name2 >> name3 >> name4 >> Tel >> Email;
@@ -130,15 +117,13 @@ void consultar()
 			salida >> name1;
 
 		}
-		//se cierra para que no se puedan leer datos que no se desean leer
+		//se cierra para poder ser usado despues de una manera segura
 		salida.close();
 	}
 }
 void ordenar()
 {
 	system("cls");
-
-	temp.open("temp.txt", ios::out);
 	salida.open("Datos.txt", ios::in);
 
 	if (salida.fail())
@@ -147,10 +132,13 @@ void ordenar()
 		system("pause");
 	}
 	else{
+		salida.close();
 		string letra;
 
-		for (int i = 0; i < 25; i++)
+		for (int i = 0; i < 26; i++)
 		{
+			salida.open("Datos.txt", ios::in);
+			temp.open("temp.txt", ios::out | ios::app);
 			
 			salida >> name1;
 
@@ -161,30 +149,39 @@ void ordenar()
 
 				letra = name1;
 				
-
-				if (letra.substr(0, 1) == mayus.substr(i, i + 1) || letra.substr(0, 1) == min.substr(i, i + 1))
+				//busca coincidencias en orden alfatico por medio de las string mayus y min
+				if (letra.substr(0, 1) == mayus.substr(i, 1) || letra.substr(0, 1) == min.substr(i, 1))
 				{
 					temp << name1 << " " << name2 << " " << name3 << " " << name4 << "\n" << Tel << "\n" << Email << "\n\n";
 				}
 
 				salida >> name1;
 
-				//cout << letra.substr(0, 1)  << mayus.substr(i, i + 1) << min.substr(i, i + 1) << ", ";
 			}
-
-			cout << letra.substr(0, 1);// << mayus.substr(i, i + 1) << min.substr(i, i + 1) << ", ";
-		}
-
-		cout << "los archivos se han ordenado" << endl;
 
 		
 
+			temp.close();
+			salida.close();	
+
+		}
+
+		cout << "\nlos archivos se han ordenado de A a Z segun el primer nombre" << endl;
+
+		salida.open("Datos.txt", ios::in);
+		temp.open("temp.txt", ios::out | ios::app);
+
+		salida.close();
+		temp.close();
+
+		//elimina el archivo Datos.txt
+		remove("Datos.txt");
+		//como el archivo temp.txt esta ordenado le cambia el nombre a Datos.txt para usarlo despues
+		rename("temp.txt", "Datos.txt");
+
 	}
 
-	temp.close();
-	salida.close();
-
-
+	
 }
 void eliminar_contacto()
 {
@@ -212,12 +209,15 @@ void eliminar_contacto()
 		{
 			salida >> name2 >> name3 >> name4 >> Tel >> Email;
 
+			
 			if (strcmp(aux1, name1) == 0 && strcmp(aux2, name3) == 0)
 			{
+				//mustra el mensaje pero no ingresa nada al temp.txt
 				cout << "El registro ha sido elimidado" << endl;
 			}
 			else
 			{
+				//ingresa los registros que no se desean eliminar en el temp.txt
 				temp << name1 << " " << name2 << " " << name3 << " " << name4 << "\n" << Tel << "\n" << Email << "\n\n";
 			}
 
@@ -248,6 +248,7 @@ void buscar()
 		int decision = 0;
 		system("cls");
 
+		//menu de busqueda
 		cout << "BUSCAR\n\n" << endl;
 		cout << "1. Por nombre" << endl;
 		cout << "2. por apellido" << endl;
@@ -293,6 +294,7 @@ void buscar()
 		{
 			salida >> name2 >> name3 >> name4 >> Tel >> Email;
 
+			//muestra solo las coincidencias
 			if (strcmp(aux1, name1) == 0 || strcmp(aux1, name2) == 0 || strcmp(aux2, name3) == 0 || strcmp(aux2, name4) == 0)
 			{
 				cout << "Nombre: " << name1 << " " << name2 << " " << name3 << " " << name4 << "\nTelefono: " << Tel << "\nEmail: " << Email << "\n\n";
@@ -312,7 +314,7 @@ void buscar()
 
 void main()
 {
-		
+	
 	while (Op2[0] == 's')
 
 	{
