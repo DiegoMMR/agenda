@@ -166,7 +166,7 @@ void ordenar()
 
 		}
 
-		cout << "\nlos archivos se han ordenado de A a Z segun el primer nombre" << endl;
+		cout << "\nlos registros se han ordenado de A a Z segun el primer nombre" << endl;
 
 		salida.open("Datos.txt", ios::in);
 		temp.open("temp.txt", ios::out | ios::app);
